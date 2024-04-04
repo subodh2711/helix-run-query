@@ -26,7 +26,8 @@ WITH daily_events AS (
     source,
     target,
     weight,
-    TIMESTAMP_TRUNC(time, DAY, @timezone) AS date
+    TIMESTAMP_TRUNC(time, DAY, @timezone) AS date,
+    TIMESTAMP_TRUNC(time, DAY, @timezone) AS dategroup
   FROM
     helix_rum.EVENTS_V5(
       @url, # url
@@ -51,7 +52,8 @@ weekly_events AS (
     source,
     target,
     weight,
-    TIMESTAMP_TRUNC(time, ISOWEEK, @timezone) AS date
+    TIMESTAMP_TRUNC(time, DAY, @timezone) AS date,
+    TIMESTAMP_TRUNC(time, ISOWEEK, @timezone) AS dategroup
   FROM
     helix_rum.EVENTS_V5(
       @url, # url
@@ -76,7 +78,8 @@ monthly_events AS (
     source,
     target,
     weight,
-    TIMESTAMP_TRUNC(time, MONTH, @timezone) AS date
+    TIMESTAMP_TRUNC(time, DAY, @timezone) AS date,
+    TIMESTAMP_TRUNC(time, MONTH, @timezone) AS dategroup
   FROM
     helix_rum.EVENTS_V5(
       @url, # url
@@ -97,6 +100,7 @@ events AS (
   SELECT
     id,
     date,
+    dategroup,
     hostname,
     checkpoint,
     source,
@@ -108,6 +112,7 @@ events AS (
   SELECT
     id,
     date,
+    dategroup,
     hostname,
     checkpoint,
     source,
@@ -119,6 +124,7 @@ events AS (
   SELECT
     id,
     date,
+    dategroup,
     hostname,
     checkpoint,
     source,
@@ -132,6 +138,7 @@ enter_events AS (
   SELECT
     id,
     date,
+    dategroup,
     hostname,
     checkpoint,
     source,
@@ -145,6 +152,7 @@ utm_source_events AS (
   SELECT
     id,
     date,
+    dategroup,
     hostname,
     checkpoint,
     source,
@@ -160,6 +168,7 @@ utm_medium_events AS (
   SELECT
     id,
     date,
+    dategroup,
     hostname,
     checkpoint,
     source,
@@ -175,6 +184,7 @@ utm_campaign_events AS (
   SELECT
     id,
     date,
+    dategroup,
     hostname,
     checkpoint,
     source,
@@ -190,6 +200,7 @@ utm_term_events AS (
   SELECT
     id,
     date,
+    dategroup,
     hostname,
     checkpoint,
     source,
@@ -205,6 +216,7 @@ utm_content_events AS (
   SELECT
     id,
     date,
+    dategroup,
     hostname,
     checkpoint,
     source,
@@ -220,6 +232,7 @@ utm_paid_events AS (
   SELECT
     id,
     date,
+    dategroup,
     hostname,
     checkpoint,
     source,
@@ -236,7 +249,7 @@ utm_paid_events AS (
 enter_events_with_utm AS (
   SELECT
     e.id,
-    e.date,
+    e.dategroup,
     e.hostname,
     e.checkpoint,
     e.source,
@@ -254,12 +267,12 @@ enter_events_with_utm AS (
   LEFT JOIN utm_term_events AS ut ON e.id = ut.id AND e.date = ut.date
   LEFT JOIN utm_content_events AS uc2 ON e.id = uc2.id AND e.date = uc2.date
   LEFT JOIN utm_paid_events AS up ON e.id = up.id AND e.date = up.date
-  GROUP BY e.id, e.date, e.hostname, e.checkpoint, e.source, e.weight
+  GROUP BY e.id, e.dategroup, e.hostname, e.checkpoint, e.source, e.weight
 ),
 
 enter_events_grouped AS (
   SELECT
-    date,
+    dategroup AS date,
     hostname,
     checkpoint,
     source,
@@ -273,7 +286,7 @@ enter_events_grouped AS (
     COUNT(source) AS count
   FROM enter_events_with_utm
   GROUP BY
-    date,
+    dategroup,
     hostname,
     checkpoint,
     source,
