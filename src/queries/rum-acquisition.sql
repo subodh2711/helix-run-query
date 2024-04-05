@@ -26,7 +26,9 @@ WITH daily_events AS (
     source,
     target,
     weight,
-    TIMESTAMP_TRUNC(time, DAY, @timezone) AS date,
+    -- date is used for event correlation
+    TIMESTAMP_TRUNC(time, HOUR, @timezone) AS date,
+    -- dategroup is used for response in the desired granularity
     TIMESTAMP_TRUNC(time, DAY, @timezone) AS dategroup
   FROM
     helix_rum.EVENTS_V5(
@@ -52,7 +54,7 @@ weekly_events AS (
     source,
     target,
     weight,
-    TIMESTAMP_TRUNC(time, DAY, @timezone) AS date,
+    TIMESTAMP_TRUNC(time, HOUR, @timezone) AS date,
     TIMESTAMP_TRUNC(time, ISOWEEK, @timezone) AS dategroup
   FROM
     helix_rum.EVENTS_V5(
@@ -78,7 +80,7 @@ monthly_events AS (
     source,
     target,
     weight,
-    TIMESTAMP_TRUNC(time, DAY, @timezone) AS date,
+    TIMESTAMP_TRUNC(time, HOUR, @timezone) AS date,
     TIMESTAMP_TRUNC(time, MONTH, @timezone) AS dategroup
   FROM
     helix_rum.EVENTS_V5(
